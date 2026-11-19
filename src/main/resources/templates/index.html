@@ -106,5 +106,52 @@
         <footer class="footer"><span>nomi</span> &nbsp; make something delicious. <span class="footer-right">COOK SMARTER. WASTE LESS.</span></footer>
     </main>
 </div>
+<script>
+    (function () {
+        const pantrySection = document.getElementById("ingredients");
+
+        async function updatePantryInPlace(form) {
+            const savedScrollY = window.scrollY;
+            const submitter = form.queryControls && form.queryControls();
+            const formData = new FormData(form);
+
+            try {
+                const response = await fetch(form.action, {
+                    method: "POST",
+                    body: new URLSearchParams(formData),
+                    headers: { "Content-Type": "application/x-www-form-urlencoded" }
+                });
+                if (!response.ok) throw new Error("Pantry update failed");
+
+                const html = await response.text();
+                const nextDocument = new DOMParser().parseFromString(html, "text/html");
+                const nextSection = nextDocument.getElementById("ingredients");
+                if (!pantrySection || !nextSection) {
+                    window.location.reload();
+                    return;
+                }
+
+                pantrySection.innerHTML = nextSection.innerHTML;
+                attachPantryHandlers();
+                requestAnimationFrame(() => window.scrollTo({ top: savedScrollY, left: 0, behavior: "instant" }));
+            } catch (error) {
+                window.location.reload();
+            }
+        }
+
+        function attachPantryHandlers() {
+            document.querySelectorAll(".quantity-control, .row-actions form").forEach((form) => {
+                form.removeAttribute("data-nomi-bound");
+                form.setAttribute("data-nomi-bound", "true");
+                form.addEventListener("submit", (event) => {
+                    event.preventDefault();
+                    updatePantryInPlace(form);
+                });
+            });
+        }
+
+        attachPantryHandlers();
+    })();
+</script>
 </body>
 </html>
