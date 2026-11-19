@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>Sign in — nomi</title><link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body class="auth-body">
+<main class="auth-shell">
+    <a class="auth-brand" th:href="@{/}">nomi</a>
+    <section class="auth-card">
+        <p class="eyebrow"><span class="eyebrow-dot"></span> WELCOME BACK</p>
+        <h1>Sign in<span class="period">.</span></h1>
+        <p class="auth-copy">Cook smarter with the pantry and recipes saved to your account.</p>
+        <div class="message error" th:if="${error}" th:text="${error}" role="alert"></div>
+        <form class="auth-form" method="post" th:action="@{/auth/sign-in}">
+            <input type="hidden" name="next" th:value="${next}">
+            <label class="field">Email<input type="email" name="email" autocomplete="email" placeholder="you@example.com" th:value="${email}" required></label>
+            <label class="field">Password<input type="password" name="password" autocomplete="current-password" required></label>
+            <button class="auth-submit" type="submit">Sign in <span>↗</span></button>
+        </form>
+        <p class="auth-switch">New to nomi? <a th:href="@{/auth/sign-up(next=${next})}">Create an account</a></p>
+    </section>
+</main>
+</body>
+</html>

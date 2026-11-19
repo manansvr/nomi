@@ -484,3 +484,20 @@ h1 { margin-bottom: 7px; font: 600 30px/1.25 'Manrope', sans-serif; letter-spaci
     .recipe-input-row .field { font-size: 8px; }
     .recipe-input-row .field input { padding: 0 7px; font-size: 9px; }
 }
+
+.auth-body { min-height: 100vh; background: #f7f6f1; }
+.auth-shell { display: grid; min-height: 100vh; place-content: center; padding: 28px 18px; }
+.auth-brand { margin-bottom: 22px; color: #26372d; font: 800 30px/1 'Manrope', sans-serif; letter-spacing: -2px; text-align: center; }
+.auth-card { width: min(390px, calc(100vw - 36px)); border: 1px solid #e7e8e0; border-radius: 16px; padding: 28px; background: #fff; box-shadow: 0 20px 60px rgba(59, 76, 61, .08); }
+.auth-card h1 { margin: 0 0 8px; }
+.auth-copy { margin: 0 0 20px; color: #858c82; font-size: 11px; line-height: 1.55; }
+.auth-form { display: grid; gap: 13px; }
+.auth-form .field { font-size: 10px; }
+.auth-form .field input { height: 44px; }
+.auth-submit { display: flex; height: 44px; align-items: center; justify-content: space-between; border: 0; border-radius: 8px; margin-top: 3px; padding: 0 14px; background: #55795a; color: #fff; font-size: 11px; font-weight: 700; }
+.auth-submit span { font-size: 15px; }
+.auth-switch { margin: 18px 0 0; color: #858c82; font-size: 10px; text-align: center; }
+.auth-switch a { color: #55795a; font-weight: 700; }
+.profile-signout { margin-left: auto; }
+.profile-signout button { width: 28px; height: 28px; border: 0; border-radius: 7px; background: transparent; color: #868c83; font-size: 15px; }
+.profile-signout button:hover { background: #fbefeb; color: #be7253; }

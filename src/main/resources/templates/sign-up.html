@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>Create account — nomi</title><link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body class="auth-body">
+<main class="auth-shell">
+    <a class="auth-brand" th:href="@{/}">nomi</a>
+    <section class="auth-card">
+        <p class="eyebrow"><span class="eyebrow-dot"></span> YOUR FOOD COMPANION</p>
+        <h1>Create account<span class="period">.</span></h1>
+        <p class="auth-copy">Save your pantry, recipes, favorites, and shopping list.</p>
+        <div class="message error" th:if="${error}" th:text="${error}" role="alert"></div>
+        <form class="auth-form" method="post" th:action="@{/auth/sign-up}">
+            <input type="hidden" name="next" th:value="${next}">
+            <label class="field">Name<input type="text" name="name" autocomplete="name" placeholder="Your name" maxlength="80" th:value="${name}" required></label>
+            <label class="field">Email<input type="email" name="email" autocomplete="email" placeholder="you@example.com" th:value="${email}" required></label>
+            <label class="field">Password<input type="password" name="password" autocomplete="new-password" minlength="8" required></label>
+            <button class="auth-submit" type="submit">Create account <span>↗</span></button>
+        </form>
+        <p class="auth-switch">Already have an account? <a th:href="@{/auth/sign-in(next=${next})}">Sign in</a></p>
+    </section>
+</main>
+</body>
+</html>

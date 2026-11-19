@@ -30,7 +30,8 @@ public class RecipeCatalogService {
         if (!reload()) save();
     }
 
-    public List<RecipeMatch> findMatches() {
+    public synchronized List<RecipeMatch> findMatches() {
+        reload();
         List<RecipeMatch> matches = new ArrayList<>();
         for (Recipe recipe : recipes) {
             List<RecipeIngredient> missing = recipe.getIngredients().stream().filter(item -> !ingredientService.hasIngredient(item.getName())).toList();
@@ -45,17 +46,20 @@ public class RecipeCatalogService {
     public List<RecipeMatch> findFavorites() { return findMatches().stream().filter(RecipeMatch::isFavorite).toList(); }
 
     public synchronized Recipe addRecipe(String name, String description, int minutes, List<RecipeIngredient> ingredients, List<String> instructions) {
+        reload();
         Recipe recipe = new Recipe(UUID.randomUUID().toString(), name.trim(), description.trim(), "🍽️", "sage", minutes, ingredients, instructions);
         recipes.add(recipe); save(); return recipe;
     }
 
     public synchronized boolean removeRecipe(String recipeId) {
+        reload();
         boolean removed = recipes.removeIf(recipe -> recipe.getId().equals(recipeId));
         if (removed) { favorites.remove(recipeId); save(); }
         return removed;
     }
 
     public synchronized boolean toggleFavorite(String recipeId) {
+        reload();
         if (recipes.stream().noneMatch(recipe -> recipe.getId().equals(recipeId))) return false;
         if (!favorites.add(recipeId)) favorites.remove(recipeId);
         save(); return true;
@@ -65,7 +69,7 @@ public class RecipeCatalogService {
         return findMatches().stream().filter(match -> match.getRecipe().getId().equals(recipeId)).findFirst().orElse(null);
     }
 
-    public int favoriteCount() { return favorites.size(); }
+    public synchronized int favoriteCount() { reload(); return favorites.size(); }
 
     private void save() {
         if (storage == null) return;
@@ -76,10 +80,11 @@ public class RecipeCatalogService {
     private boolean reload() {
         if (storage == null) return false;
         java.util.Optional<StoredCatalog> saved = storage.read("recipes.json", new TypeReference<>() { });
-        if (saved.isEmpty()) return false;
         recipes.clear();
+        favorites.clear();
+        if (saved.isEmpty()) return false;
         saved.get().recipes().stream().map(RecipeCatalogService::restore).forEach(recipes::add);
-        favorites.clear(); favorites.addAll(saved.get().favorites());
+        favorites.addAll(saved.get().favorites());
         return true;
     }
 

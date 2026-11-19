@@ -27,9 +27,11 @@
         <p class="note-copy">Your pantry is the starting point for something delicious.</p>
     </div>
     <div class="profile">
-        <div class="avatar">M</div>
-        <div><strong>Manan</strong><span>Home cook</span></div>
-        <span class="profile-menu">···</span>
+        <div class="avatar" th:text="${#strings.substring(session.currentUser.name, 0, 1)}">M</div>
+        <div><strong th:text="${session.currentUser.name}">Home cook</strong><span th:text="${session.currentUser.email}">email</span></div>
+        <form method="post" th:action="@{/auth/sign-out}" class="profile-signout">
+            <button type="submit" aria-label="Sign out" title="Sign out">↪</button>
+        </form>
     </div>
 </aside>
 </body>

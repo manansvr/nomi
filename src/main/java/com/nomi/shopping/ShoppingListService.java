@@ -42,20 +42,24 @@ public class ShoppingListService {
     private void validateCategories(List<RecipeIngredient> ingredients, List<String> categories) { validateCategoryValues(categories, ingredients.size()); }
 
     public synchronized List<ShoppingItem> findAll() {
+        reload();
         return items.stream().sorted(Comparator.comparing(ShoppingItem::isPurchased).thenComparing(ShoppingItem::getName)).toList();
     }
 
     public synchronized int addMissing(List<RecipeIngredient> ingredients, List<String> categories) {
+        reload();
         addMissingItems(ingredients, categories); save(); return ingredients.size();
     }
 
     public synchronized boolean addMissingFromRecipe(String recipeId, List<RecipeIngredient> ingredients, List<String> categories) {
+        reload();
         validateCategories(ingredients, categories);
         if (!addedRecipeIds.add(recipeId)) return false;
         addMissingItems(ingredients, categories); save(); return true;
     }
 
     public synchronized int addMissingFromRecipes(List<RecipeMatch> recipes, List<String> categories) {
+        reload();
         int expectedCategories = recipes.stream().mapToInt(RecipeMatch::getMissingCount).sum();
         validateCategoryValues(categories, expectedCategories);
         int addedCount = 0; int categoryOffset = 0;
@@ -68,7 +72,7 @@ public class ShoppingListService {
         save(); return addedCount;
     }
 
-    public synchronized void forgetRecipe(String recipeId) { if (addedRecipeIds.remove(recipeId)) save(); }
+    public synchronized void forgetRecipe(String recipeId) { reload(); if (addedRecipeIds.remove(recipeId)) save(); }
 
     private void addMissingItems(List<RecipeIngredient> ingredients, List<String> categories) {
         validateCategories(ingredients, categories);
@@ -87,6 +91,7 @@ public class ShoppingListService {
     }
 
     public synchronized boolean togglePurchased(String id, String category) {
+        reload();
         ShoppingItem item = findById(id); if (item == null) return false;
         if (!item.isPurchased() && !item.isAddedToPantry()) {
             String selectedCategory = category == null || category.isBlank() ? item.getCategory() : category;
@@ -98,11 +103,12 @@ public class ShoppingListService {
     }
 
     public synchronized boolean remove(String id) {
+        reload();
         boolean removed = items.removeIf(item -> item.getId().equals(id)); if (removed) save(); return removed;
     }
 
-    public synchronized int activeCount() { return (int) items.stream().filter(item -> !item.isPurchased()).count(); }
-    public synchronized int totalCount() { return items.size(); }
+    public synchronized int activeCount() { reload(); return (int) items.stream().filter(item -> !item.isPurchased()).count(); }
+    public synchronized int totalCount() { reload(); return items.size(); }
 
     private ShoppingItem findById(String id) { return items.stream().filter(item -> item.getId().equals(id)).findFirst().orElse(null); }
 
@@ -115,10 +121,11 @@ public class ShoppingListService {
     private boolean reload() {
         if (storage == null) return false;
         java.util.Optional<StoredShoppingList> saved = storage.read("shopping-list.json", new TypeReference<>() { });
-        if (saved.isEmpty()) return false;
         items.clear();
+        addedRecipeIds.clear();
+        if (saved.isEmpty()) return false;
         saved.get().items().stream().map(item -> new ShoppingItem(item.id(), item.name(), item.quantity(), item.unit(), item.category(), item.purchased(), item.addedToPantry())).forEach(items::add);
-        addedRecipeIds.clear(); addedRecipeIds.addAll(saved.get().addedRecipeIds());
+        addedRecipeIds.addAll(saved.get().addedRecipeIds());
         return true;
     }
 

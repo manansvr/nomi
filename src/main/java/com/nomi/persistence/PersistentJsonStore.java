@@ -12,6 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
+import com.nomi.auth.NomiDataContext;
 
 @Component
 public class PersistentJsonStore {
@@ -28,12 +29,13 @@ public class PersistentJsonStore {
     }
 
     public <T> Optional<T> read(String fileName, TypeReference<T> type) {
-        Path file = dataDirectory.resolve(fileName);
+        String documentKey = documentKey(fileName);
+        Path file = dataDirectory.resolve(documentKey.replace(':', '_'));
         if (jdbcTemplate == null) {
             return Files.exists(file) ? Optional.ofNullable(LocalJsonStore.read(file, type, null)) : Optional.empty();
         }
-        List<String> payloads = jdbcTemplate.query("SELECT payload::text FROM nomi_documents WHERE document_key = ?", (row, i) -> row.getString("payload"), fileName);
-        if (!payloads.isEmpty()) return Optional.of(readJson(payloads.get(0), type, fileName));
+        List<String> payloads = jdbcTemplate.query("SELECT payload::text FROM nomi_documents WHERE document_key = ?", (row, i) -> row.getString("payload"), documentKey);
+        if (!payloads.isEmpty()) return Optional.of(readJson(payloads.get(0), type, documentKey));
         if (!Files.exists(file)) return Optional.empty();
         T imported = LocalJsonStore.read(file, type, null);
         write(fileName, imported);
@@ -41,13 +43,17 @@ public class PersistentJsonStore {
     }
 
     public void write(String fileName, Object value) {
-        if (jdbcTemplate == null) { LocalJsonStore.write(dataDirectory.resolve(fileName), value); return; }
+        String documentKey = documentKey(fileName);
+        if (jdbcTemplate == null) { LocalJsonStore.write(dataDirectory.resolve(documentKey.replace(':', '_')), value); return; }
         try {
             String payload = objectMapper.writeValueAsString(value);
-            jdbcTemplate.update("INSERT INTO nomi_documents (document_key, payload) VALUES (?, ?::jsonb) ON CONFLICT (document_key) DO UPDATE SET payload = EXCLUDED.payload, updated_at = CURRENT_TIMESTAMP", fileName, payload);
+            jdbcTemplate.update("INSERT INTO nomi_documents (document_key, payload) VALUES (?, ?::jsonb) ON CONFLICT (document_key) DO UPDATE SET payload = EXCLUDED.payload, updated_at = CURRENT_TIMESTAMP", documentKey, payload);
         } catch (JsonProcessingException error) {
             throw new IllegalStateException("Could not serialize nomi data for " + fileName, error);
         }
+    }
+    private String documentKey(String fileName) {
+        return NomiDataContext.userId() + ":" + fileName;
     }
 
     private <T> T readJson(String payload, TypeReference<T> type, String fileName) {
