@@ -7,6 +7,6 @@ RUN mvn -B -DskipTests package
 FROM eclipse-temurin:17-jre
 WORKDIR /app
 COPY --from=build /workspace/target/nomi-0.1.0.jar /app/nomi.jar
-ENV PORT=8080
-EXPOSE 8080
+ENV PORT=80
+EXPOSE 80
 ENTRYPOINT ["java", "-jar", "/app/nomi.jar"]
