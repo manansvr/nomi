@@ -6,11 +6,7 @@ This Java web app follows a four-step cooking workflow: create recipes, review e
 
 ## Run locally
 
-Requires Java 17 and Maven. With Homebrew:
-
-```sh
-brew install openjdk@17 maven
-```
+Requires Java 17 and Maven.
 
 ```sh
 mvn spring-boot:run
@@ -19,9 +15,3 @@ mvn spring-boot:run
 Then open [http://localhost:8080](http://localhost:8080).
 
 Pantry, recipes, favorites, and shopping-list data are stored locally in the ignored `data/` directory and survive app restarts.
-
-## Deploy on Vercel
-
-The root `Dockerfile` packages nomi for Vercel's Container runtime (currently in beta). Connect a PostgreSQL provider from the Vercel Marketplace (for example, Neon) and make sure `DATABASE_URL` or `POSTGRES_URL` is available to the deployment. Nomi stores its pantry, recipes, and shopping list as JSON documents in PostgreSQL; if a matching local JSON file exists when a document is first read, it is imported automatically. Without a database URL, local development continues to use the `data/` directory.
-
-Set the Vercel project to the **Container** framework if it is not selected automatically. This version has no sign-in, so everyone who can access a deployment shares the same pantry, recipes, and shopping list; keep it private until authentication is added.
