@@ -6,7 +6,7 @@ This Java web app follows a four-step cooking workflow: create recipes, review e
 
 ## Accounts
 
-Create an account with your name, email, and a password of at least 8 characters, or sign in with an existing account. Passwords are stored as BCrypt hashes. Pantry ingredients, recipes, favorites, and shopping lists are kept separate for each account. Sign out from the profile area in the app navigation.
+Create an account with your name, email, and a password of at least 8 characters, or sign in with an existing account. Passwords are stored as BCrypt hashes. Pantry ingredients, recipes, favorites, and shopping lists are kept separate for each account. With PostgreSQL configured, login sessions are shared across app instances and remain active for up to 30 days. Sign out from the profile area in the app navigation.
 
 ## Run locally
 

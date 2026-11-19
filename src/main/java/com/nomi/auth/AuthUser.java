@@ -1,3 +1,5 @@
 package com.nomi.auth;
 
-public record AuthUser(String id, String name, String email) {}
+import java.io.Serializable;
+
+public record AuthUser(String id, String name, String email) implements Serializable {}

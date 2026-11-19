@@ -6,6 +6,8 @@ import org.springframework.context.annotation.*;
 import org.springframework.core.env.Environment;
 import org.springframework.core.type.AnnotatedTypeMetadata;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.sql.DataSource;
 import java.net.URI;
@@ -29,6 +31,11 @@ public class DatabaseConfiguration {
 
     @Bean
     public JdbcTemplate nomiJdbcTemplate(DataSource nomiDataSource) { return new JdbcTemplate(nomiDataSource); }
+
+    @Bean
+    public PlatformTransactionManager nomiTransactionManager(DataSource nomiDataSource) {
+        return new DataSourceTransactionManager(nomiDataSource);
+    }
 
     static ConnectionDetails parse(String value, Environment environment) {
         String username = first(environment.getProperty("SPRING_DATASOURCE_USERNAME"), environment.getProperty("POSTGRES_USER"), environment.getProperty("PGUSER"));
