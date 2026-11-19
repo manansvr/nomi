@@ -1,13 +1,10 @@
 package com.nomi.ingredient;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.nomi.persistence.LocalJsonStore;
+import com.nomi.persistence.PersistentJsonStore;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -28,18 +25,12 @@ public class IngredientService {
             new Ingredient("8", "Extra virgin olive oil", "Spices", 1, "bottle")
     ));
     private final List<String> categories = List.of("Protein", "Carbohydrate", "Vegetable", "Fruits", "Spices");
-    private Path storageFile;
+    private PersistentJsonStore storage;
 
     @Autowired
-    public synchronized void configureStorage(@Value("${nomi.data-directory:data}") String dataDirectory) {
-        storageFile = Path.of(dataDirectory).resolve("ingredients.json");
-        if (Files.exists(storageFile)) {
-            List<StoredIngredient> saved = LocalJsonStore.read(storageFile, new TypeReference<>() { }, List.of());
-            ingredients.clear();
-            saved.stream().map(item -> new Ingredient(item.id(), item.name(), item.category(), item.quantity(), item.unit())).forEach(ingredients::add);
-        } else {
-            save();
-        }
+    public synchronized void configureStorage(PersistentJsonStore storage) {
+        this.storage = storage;
+        if (!reload()) save();
     }
 
     public synchronized List<Ingredient> find(String search, String category) {
@@ -97,10 +88,21 @@ public class IngredientService {
     }
 
     private void save() {
-        if (storageFile == null) return;
+        if (storage == null) return;
         List<StoredIngredient> saved = ingredients.stream()
                 .map(item -> new StoredIngredient(item.getId(), item.getName(), item.getCategory(), item.getQuantity(), item.getUnit())).toList();
-        LocalJsonStore.write(storageFile, saved);
+        storage.write("ingredients.json", saved);
+    }
+
+    public synchronized void refresh() { reload(); }
+
+    private boolean reload() {
+        if (storage == null) return false;
+        java.util.Optional<List<StoredIngredient>> saved = storage.read("ingredients.json", new TypeReference<>() { });
+        if (saved.isEmpty()) return false;
+        ingredients.clear();
+        saved.get().stream().map(item -> new Ingredient(item.id(), item.name(), item.category(), item.quantity(), item.unit())).forEach(ingredients::add);
+        return true;
     }
 
     private record StoredIngredient(String id, String name, String category, int quantity, String unit) { }

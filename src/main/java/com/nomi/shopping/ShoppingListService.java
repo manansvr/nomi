@@ -3,15 +3,12 @@ package com.nomi.shopping;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.nomi.ingredient.IngredientNames;
 import com.nomi.ingredient.IngredientService;
-import com.nomi.persistence.LocalJsonStore;
+import com.nomi.persistence.PersistentJsonStore;
 import com.nomi.recipe.RecipeIngredient;
 import com.nomi.recipe.RecipeMatch;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -24,21 +21,16 @@ public class ShoppingListService {
     private final List<ShoppingItem> items = new ArrayList<>();
     private final Set<String> addedRecipeIds = new HashSet<>();
     private final IngredientService ingredientService;
-    private Path storageFile;
+    private PersistentJsonStore storage;
 
     @Autowired
     public ShoppingListService(IngredientService ingredientService) { this.ingredientService = ingredientService; }
     public ShoppingListService() { this(new IngredientService()); }
 
     @Autowired
-    public synchronized void configureStorage(@Value("${nomi.data-directory:data}") String dataDirectory) {
-        storageFile = Path.of(dataDirectory).resolve("shopping-list.json");
-        if (Files.exists(storageFile)) {
-            StoredShoppingList saved = LocalJsonStore.read(storageFile, new TypeReference<>() { }, new StoredShoppingList(List.of(), Set.of()));
-            items.clear();
-            saved.items().stream().map(item -> new ShoppingItem(item.id(), item.name(), item.quantity(), item.unit(), item.category(), item.purchased(), item.addedToPantry())).forEach(items::add);
-            addedRecipeIds.clear(); addedRecipeIds.addAll(saved.addedRecipeIds());
-        } else save();
+    public synchronized void configureStorage(PersistentJsonStore storage) {
+        this.storage = storage;
+        if (!reload()) save();
     }
 
     private void validateCategoryValues(List<String> categories, int expectedCount) {
@@ -115,9 +107,19 @@ public class ShoppingListService {
     private ShoppingItem findById(String id) { return items.stream().filter(item -> item.getId().equals(id)).findFirst().orElse(null); }
 
     private void save() {
-        if (storageFile == null) return;
+        if (storage == null) return;
         List<StoredShoppingItem> savedItems = items.stream().map(item -> new StoredShoppingItem(item.getId(), item.getName(), item.getQuantity(), item.getUnit(), item.isPurchased(), item.getCategory(), item.isAddedToPantry())).toList();
-        LocalJsonStore.write(storageFile, new StoredShoppingList(savedItems, new HashSet<>(addedRecipeIds)));
+        storage.write("shopping-list.json", new StoredShoppingList(savedItems, new HashSet<>(addedRecipeIds)));
+    }
+
+    private boolean reload() {
+        if (storage == null) return false;
+        java.util.Optional<StoredShoppingList> saved = storage.read("shopping-list.json", new TypeReference<>() { });
+        if (saved.isEmpty()) return false;
+        items.clear();
+        saved.get().items().stream().map(item -> new ShoppingItem(item.id(), item.name(), item.quantity(), item.unit(), item.category(), item.purchased(), item.addedToPantry())).forEach(items::add);
+        addedRecipeIds.clear(); addedRecipeIds.addAll(saved.get().addedRecipeIds());
+        return true;
     }
 
     private record StoredShoppingList(List<StoredShoppingItem> items, Set<String> addedRecipeIds) { }

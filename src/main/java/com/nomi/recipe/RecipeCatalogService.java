@@ -2,13 +2,10 @@ package com.nomi.recipe;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.nomi.ingredient.IngredientService;
-import com.nomi.persistence.LocalJsonStore;
+import com.nomi.persistence.PersistentJsonStore;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -23,18 +20,14 @@ public class RecipeCatalogService {
     private final IngredientService ingredientService;
     private final Set<String> favorites = ConcurrentHashMap.newKeySet();
     private final List<Recipe> recipes = new CopyOnWriteArrayList<>();
-    private Path storageFile;
+    private PersistentJsonStore storage;
 
     public RecipeCatalogService(IngredientService ingredientService) { this.ingredientService = ingredientService; }
 
     @Autowired
-    public synchronized void configureStorage(@Value("${nomi.data-directory:data}") String dataDirectory) {
-        storageFile = Path.of(dataDirectory).resolve("recipes.json");
-        if (Files.exists(storageFile)) {
-            StoredCatalog saved = LocalJsonStore.read(storageFile, new TypeReference<>() { }, new StoredCatalog(List.of(), Set.of()));
-            recipes.clear(); saved.recipes().stream().map(RecipeCatalogService::restore).forEach(recipes::add);
-            favorites.clear(); favorites.addAll(saved.favorites());
-        } else save();
+    public synchronized void configureStorage(PersistentJsonStore storage) {
+        this.storage = storage;
+        if (!reload()) save();
     }
 
     public List<RecipeMatch> findMatches() {
@@ -75,9 +68,19 @@ public class RecipeCatalogService {
     public int favoriteCount() { return favorites.size(); }
 
     private void save() {
-        if (storageFile == null) return;
+        if (storage == null) return;
         List<StoredRecipe> savedRecipes = recipes.stream().map(RecipeCatalogService::store).toList();
-        LocalJsonStore.write(storageFile, new StoredCatalog(savedRecipes, new HashSet<>(favorites)));
+        storage.write("recipes.json", new StoredCatalog(savedRecipes, new HashSet<>(favorites)));
+    }
+
+    private boolean reload() {
+        if (storage == null) return false;
+        java.util.Optional<StoredCatalog> saved = storage.read("recipes.json", new TypeReference<>() { });
+        if (saved.isEmpty()) return false;
+        recipes.clear();
+        saved.get().recipes().stream().map(RecipeCatalogService::restore).forEach(recipes::add);
+        favorites.clear(); favorites.addAll(saved.get().favorites());
+        return true;
     }
 
     private static StoredRecipe store(Recipe recipe) {
