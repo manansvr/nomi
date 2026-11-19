@@ -41,6 +41,7 @@
                     </div>
                     <form class="recipe-action recipe-needs-form" method="post" action="#"
                           th:action="@{/shopping-list/add/{id}(id=${match.recipe.id})}">
+                        <input type="hidden" name="_csrf" th:value="${_csrf}">
                         <div class="recipe-needs-rows">
                         <div class="recipe-needs-row" th:each="item : ${match.recipe.ingredients}">
                             <span class="needs-indicator" th:classappend="${match.missingIngredients.contains(item) ? ' is-missing' : ' is-available'}"

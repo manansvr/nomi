@@ -30,6 +30,7 @@
         <div class="avatar" th:text="${#strings.substring(session.currentUser.name, 0, 1)}">M</div>
         <div><strong th:text="${session.currentUser.name}">Home cook</strong><span th:text="${session.currentUser.email}">email</span></div>
         <form method="post" th:action="@{/auth/sign-out}" class="profile-signout">
+            <input type="hidden" name="_csrf" th:value="${_csrf}">
             <button type="submit" aria-label="Sign out" title="Sign out">↪</button>
         </form>
     </div>

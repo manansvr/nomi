@@ -88,6 +88,7 @@
                         <span class="recipe-time"><span>◷</span> <span th:text="${match.recipe.minutes}">10</span> min</span>
                         <form class="favorite-form" method="post" action="#" th:if="${match.favorite || match.readyToCook}"
                               th:action="@{/recipes/{id}/favorite(id=${match.recipe.id})}">
+                            <input type="hidden" name="_csrf" th:value="${_csrf}">
                             <button type="submit" class="favorite-button" th:classappend="${match.favorite ? ' is-favorite' : ''}"
                                     th:aria-label="${match.favorite ? 'Remove from favorites' : 'Add to favorites'}">
                                 <span th:text="${match.favorite ? '♥' : '♡'}">♡</span>
@@ -106,6 +107,7 @@
                         <details class="favorite-plan" th:if="${!match.favorite && !match.readyToCook}">
                             <summary>Favorite &amp; add what's missing</summary>
                             <form method="post" action="#" th:action="@{/recipes/{id}/favorite(id=${match.recipe.id})}">
+                                <input type="hidden" name="_csrf" th:value="${_csrf}">
                                 <label class="favorite-plan-row" th:each="item : ${match.missingIngredients}">
                                     <span><strong th:text="${item.name}">Red onion</strong><small th:text="${item.amount}">1 pc</small></span>
                                     <select name="categories" required th:aria-label="${'Category for ' + item.name}">
@@ -126,6 +128,7 @@
                         </a>
                         <form class="recipe-delete-form" method="post" action="#" th:action="@{/recipes/{id}/delete(id=${match.recipe.id})}"
                               onsubmit="return confirm('Remove this recipe?')">
+                            <input type="hidden" name="_csrf" th:value="${_csrf}">
                             <button type="submit">Remove recipe</button>
                         </form>
                     </div>

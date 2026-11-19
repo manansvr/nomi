@@ -33,6 +33,7 @@
             <div class="shopping-items" th:if="${!#lists.isEmpty(items)}">
                 <div class="shopping-item" th:each="item : ${items}" th:classappend="${item.purchased ? ' is-purchased' : ''}">
                     <form class="shopping-toggle-form" method="post" action="#" th:action="@{/shopping-list/{id}/toggle(id=${item.id})}">
+                        <input type="hidden" name="_csrf" th:value="${_csrf}">
                         <button class="check-button" type="submit" th:aria-label="${item.purchased ? 'Mark ' + item.name + ' as needed' : 'Mark ' + item.name + ' as picked up'}">
                             <span th:text="${item.purchased ? '✓' : ''}"></span>
                         </button>
@@ -50,6 +51,7 @@
                         <span th:text="${item.amount}">1 pc</span>
                     </div>
                     <form class="shopping-remove-form" method="post" action="#" th:action="@{/shopping-list/{id}/delete(id=${item.id})}">
+                        <input type="hidden" name="_csrf" th:value="${_csrf}">
                         <button class="remove-button" type="submit" th:aria-label="${'Remove ' + item.name}" title="Remove item">×</button>
                     </form>
                 </div>

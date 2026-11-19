@@ -13,6 +13,7 @@
         <p class="auth-copy">Cook smarter with the pantry and recipes saved to your account.</p>
         <div class="message error" th:if="${error}" th:text="${error}" role="alert"></div>
         <form class="auth-form" method="post" th:action="@{/auth/sign-in}">
+            <input type="hidden" name="_csrf" th:value="${_csrf}">
             <input type="hidden" name="next" th:value="${next}">
             <label class="field">Email<input type="email" name="email" autocomplete="email" placeholder="you@example.com" th:value="${email}" required></label>
             <label class="field">Password<input type="password" name="password" autocomplete="current-password" required></label>

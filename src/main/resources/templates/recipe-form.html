@@ -24,6 +24,7 @@
 
         <div class="message error" hidden th:hidden="${error == null}" th:if="${error}" th:text="${error}" role="alert"></div>
         <form class="recipe-editor" method="post" action="index.html" th:action="@{/recipes}">
+            <input type="hidden" name="_csrf" th:value="${_csrf}">
             <section class="editor-section">
                 <div class="editor-section-heading">
                     <span class="editor-number">01</span>

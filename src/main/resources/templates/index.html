@@ -60,6 +60,7 @@
                     <div><span class="category-label" th:text="${ingredient.category}">Vegetable</span></div>
                     <div class="quantity-cell">
                         <form class="quantity-control" method="post" th:action="@{/ingredients/{id}/quantity(id=${ingredient.id})}">
+                            <input type="hidden" name="_csrf" th:value="${_csrf}">
                             <button type="submit" name="amount" value="-1" th:disabled="${ingredient.quantity == 0}" th:aria-label="${'Decrease ' + ingredient.name}">−</button>
                             <span><strong th:text="${ingredient.quantity}">3</strong> <span th:text="${ingredient.unit}">pcs</span></span>
                             <button type="submit" name="amount" value="1" th:aria-label="${'Increase ' + ingredient.name}">＋</button>
@@ -67,6 +68,7 @@
                     </div>
                     <div class="row-actions">
                         <form method="post" th:action="@{/ingredients/{id}/delete(id=${ingredient.id})}">
+                            <input type="hidden" name="_csrf" th:value="${_csrf}">
                             <button class="remove-button" type="submit" th:aria-label="${'Remove ' + ingredient.name}" title="Remove ingredient">×</button>
                         </form>
                     </div>
@@ -79,6 +81,7 @@
             </div>
 
             <form class="add-form" method="post" th:action="@{/ingredients}">
+                <input type="hidden" name="_csrf" th:value="${_csrf}">
                 <div class="form-heading"><span class="form-plus">＋</span><div><strong>Add to your pantry</strong><span>A few details and you're all set.</span></div></div>
                 <div class="form-fields">
                     <label class="field name-field">Ingredient name
