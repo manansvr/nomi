@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#f7f6f1">
+    <title>Recipe ingredients — nomi</title>
+    <link rel="stylesheet" href="../static/css/styles.css" th:href="@{/css/styles.css}">
+</head>
+<body>
+<div class="app-shell">
+    <aside th:replace="~{fragments/navigation :: sidebar('recipe-ingredients')}"></aside>
+    <main class="main-content">
+        <header class="topbar"><span class="today">See what each recipe needs</span></header>
+        <section class="shopping-intro">
+            <p class="eyebrow"><span class="eyebrow-dot"></span> FROM RECIPE TO PANTRY</p>
+            <h1>Recipe ingredients<span class="period">.</span></h1>
+            <p class="welcome-copy">Add missing ingredients to your shopping list; categories from each recipe are preselected.</p>
+        </section>
+
+        <div class="message success" hidden th:hidden="${notice == null}" th:if="${notice}" th:text="${notice}" role="status"></div>
+        <div class="message error" hidden th:hidden="${error == null}" th:if="${error}" th:text="${error}" role="alert"></div>
+
+        <section class="shopping-card recipe-needs-card">
+            <div class="shopping-card-heading">
+                <div>
+                    <span class="shopping-kicker">CHECK YOUR INGREDIENTS</span>
+                    <h2>What each recipe needs <span class="inline-count" th:text="${#lists.size(recipeMatches)}">0</span></h2>
+                </div>
+            </div>
+
+            <div class="recipe-needs-list" th:if="${!#lists.isEmpty(recipeMatches)}">
+                <article class="recipe-needs-item" th:each="match : ${recipeMatches}">
+                    <div class="recipe-needs-heading">
+                        <div>
+                            <h3 th:text="${match.recipe.name}">Garden toast</h3>
+                            <p th:text="${match.recipe.description}">A quick lunch.</p>
+                        </div>
+                        <span class="recipe-needs-status" th:classappend="${match.readyToCook ? ' is-ready' : ' is-missing'}"
+                              th:text="${match.readyToCook ? 'Ready to cook' : match.missingCount + ' missing'}">Ready to cook</span>
+                    </div>
+                    <form class="recipe-action recipe-needs-form" method="post" action="#"
+                          th:action="@{/shopping-list/add/{id}(id=${match.recipe.id})}">
+                        <div class="recipe-needs-rows">
+                        <div class="recipe-needs-row" th:each="item : ${match.recipe.ingredients}">
+                            <span class="needs-indicator" th:classappend="${match.missingIngredients.contains(item) ? ' is-missing' : ' is-available'}"
+                                  th:text="${match.missingIngredients.contains(item) ? '＋' : '✓'}">✓</span>
+                            <strong th:text="${item.name}">Avocado</strong>
+                            <span class="recipe-needs-amount" th:text="${item.amount}">1 pc</span>
+                            <label class="needs-category" th:if="${match.missingIngredients.contains(item)}">
+                                <span class="sr-only" th:text="${'Category for ' + item.name}">Ingredient category</span>
+                                <select name="categories" required th:aria-label="${'Category for ' + item.name}">
+                                    <option value="" th:selected="${item.category == null}" disabled>Choose category</option>
+                                    <option th:each="category : ${categories}" th:value="${category}"
+                                            th:selected="${item.category == category}" th:text="${category}">Protein</option>
+                                </select>
+                            </label>
+                            <span class="needs-label" th:unless="${match.missingIngredients.contains(item)}">In pantry</span>
+                        </div>
+                        </div>
+                        <button class="recipe-add-button" type="submit" th:disabled="${match.readyToCook}">
+                            <span th:text="${match.readyToCook ? 'Everything is in your pantry' : 'Add missing ingredients to shopping list'}">Add missing ingredients to shopping list</span>
+                            <span th:text="${match.readyToCook ? '✓' : '＋'}">＋</span>
+                        </button>
+                    </form>
+                </article>
+            </div>
+            <div class="shopping-empty" hidden th:hidden="${!#lists.isEmpty(recipeMatches)}">
+                <span class="empty-icon">☷</span>
+                <strong>Add a recipe to get started</strong>
+                <p>Once you add recipes, their ingredients will appear here with pantry availability.</p>
+                <a class="hero-button" href="recipe-form.html" th:href="@{/recipes/new}">Make a recipe <span>↗</span></a>
+            </div>
+        </section>
+
+        <p class="pantry-footnote shopping-footnote"><span>✳</span> Ingredients already in your pantry stay off the shopping list.</p>
+        <footer class="footer"><span>nomi</span> &nbsp; make something delicious. <span class="footer-right">COOK SMARTER. WASTE LESS.</span></footer>
+    </main>
+</div>
+</body>
+</html>

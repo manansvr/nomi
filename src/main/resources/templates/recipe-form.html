@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#f7f6f1">
+    <title>Add a recipe — nomi</title>
+    <link rel="stylesheet" href="../static/css/styles.css" th:href="@{/css/styles.css}">
+</head>
+<body>
+<div class="app-shell">
+    <aside th:replace="~{fragments/navigation :: sidebar('recipes')}"></aside>
+
+    <main class="main-content">
+        <header class="topbar recipe-form-topbar">
+            <a class="back-link" href="index.html" th:href="@{/recipes}">← Back to recipes</a>
+        </header>
+
+        <section class="shopping-intro recipe-form-intro">
+            <p class="eyebrow"><span class="eyebrow-dot"></span> YOUR RECIPE BOOK</p>
+            <h1>Add a recipe<span class="period">.</span></h1>
+            <p class="welcome-copy">Add ingredients and cooking steps. nomi will compare it with your pantry.</p>
+        </section>
+
+        <div class="message error" hidden th:hidden="${error == null}" th:if="${error}" th:text="${error}" role="alert"></div>
+        <form class="recipe-editor" method="post" action="index.html" th:action="@{/recipes}">
+            <section class="editor-section">
+                <div class="editor-section-heading">
+                    <span class="editor-number">01</span>
+                    <div><h2>The recipe</h2><p>Give it a name and a little description.</p></div>
+                </div>
+                <div class="editor-fields">
+                    <label class="field editor-wide">Recipe name
+                        <input type="text" name="name" maxlength="80" placeholder="e.g. Mum's lentil soup" required>
+                    </label>
+                    <label class="field editor-wide">A short description
+                        <textarea name="description" rows="2" maxlength="180" placeholder="What makes this one special?" required></textarea>
+                    </label>
+                    <label class="field editor-time">Preparation time
+                        <span class="time-input"><input type="number" name="minutes" min="1" max="600" value="20" required><span>minutes</span></span>
+                    </label>
+                </div>
+            </section>
+
+            <section class="editor-section">
+                <div class="editor-section-heading">
+                    <span class="editor-number">02</span>
+                    <div><h2>Ingredients</h2><p>Add a category to each ingredient; it will carry through to your shopping list.</p></div>
+                </div>
+                <div class="recipe-ingredient-editor" id="recipe-ingredient-editor">
+                    <div class="recipe-input-row">
+                        <label class="field">Ingredient<input type="text" name="ingredientNames" placeholder="e.g. Lentils" maxlength="60" required></label>
+                        <label class="field">Amount<input type="number" name="ingredientQuantities" min="1" max="999" value="1" required></label>
+                        <label class="field">Unit<input type="text" name="ingredientUnits" placeholder="cups" maxlength="20" required></label>
+                        <label class="field category-field">Category
+                            <select name="ingredientCategories" required>
+                                <option value="" selected disabled>Choose category</option>
+                                <option th:each="category : ${categories}" th:value="${category}" th:text="${category}">Protein</option>
+                            </select>
+                        </label>
+                        <button class="remove-input-row" type="button" aria-label="Remove ingredient" disabled>×</button>
+                    </div>
+                </div>
+                <template id="recipe-ingredient-row-template">
+                    <div class="recipe-input-row">
+                        <label class="field">Ingredient<input type="text" name="ingredientNames" maxlength="60" required></label>
+                        <label class="field">Amount<input type="number" name="ingredientQuantities" min="1" max="999" value="1" required></label>
+                        <label class="field">Unit<input type="text" name="ingredientUnits" maxlength="20" required></label>
+                        <label class="field category-field">Category
+                            <select name="ingredientCategories" required>
+                                <option value="" selected disabled>Choose category</option>
+                                <option th:each="category : ${categories}" th:value="${category}" th:text="${category}">Protein</option>
+                            </select>
+                        </label>
+                        <button class="remove-input-row" type="button" aria-label="Remove ingredient">×</button>
+                    </div>
+                </template>
+                <button class="add-ingredient-row" id="add-recipe-ingredient" type="button">＋ Add another ingredient</button>
+                <p class="editor-tip"><span>✳</span> nomi will compare these ingredients with your pantry and show what's missing.</p>
+            </section>
+
+            <section class="editor-section">
+                <div class="editor-section-heading">
+                    <span class="editor-number">03</span>
+                    <div><h2>Cooking instructions</h2><p>Put each step on a new line.</p></div>
+                </div>
+                <label class="field instructions-field">Steps
+                    <textarea name="instructions" rows="5" placeholder="Rinse the lentils and chop the vegetables.&#10;Warm the oil in a pot and add the vegetables.&#10;Add lentils and stock, then simmer until tender." required></textarea>
+                </label>
+            </section>
+
+            <div class="editor-actions">
+                <a class="cancel-link" href="index.html" th:href="@{/recipes}">Cancel</a>
+                <button class="submit-button" type="submit">Save recipe <span>↗</span></button>
+            </div>
+        </form>
+
+        <footer class="footer"><span>nomi</span> &nbsp; make something delicious. <span class="footer-right">COOK SMARTER. WASTE LESS.</span></footer>
+    </main>
+</div>
+<script>
+    const ingredientEditor = document.getElementById("recipe-ingredient-editor");
+    const addIngredientButton = document.getElementById("add-recipe-ingredient");
+    const ingredientRowTemplate = document.getElementById("recipe-ingredient-row-template");
+
+    function updateRemoveButtons() {
+        const rows = ingredientEditor.querySelectorAll(".recipe-input-row");
+        rows.forEach((row) => {
+            row.querySelector(".remove-input-row").disabled = rows.length === 1;
+        });
+    }
+
+    addIngredientButton.addEventListener("click", () => {
+        const row = ingredientRowTemplate.content.firstElementChild.cloneNode(true);
+        ingredientEditor.append(row);
+        updateRemoveButtons();
+        row.querySelector('input[name="ingredientNames"]').focus();
+    });
+
+    ingredientEditor.addEventListener("click", (event) => {
+        if (event.target.closest(".remove-input-row")) {
+            event.target.closest(".recipe-input-row").remove();
+            updateRemoveButtons();
+        }
+    });
+</script>
+</body>
+</html>
