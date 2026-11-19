@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#f7f6f1">
+    <title>Shopping list — nomi</title>
+    <link rel="stylesheet" href="../static/css/styles.css" th:href="@{/css/styles.css}">
+</head>
+<body>
+<div class="app-shell">
+    <aside th:replace="~{fragments/navigation :: sidebar('shopping-list')}"></aside>
+
+    <main class="main-content">
+        <section class="shopping-intro shopping-list-intro">
+            <p class="eyebrow"><span class="eyebrow-dot"></span> READY WHEN YOU ARE</p>
+            <h1>Your shopping list<span class="period">.</span></h1>
+            <p class="welcome-copy">Missing ingredients from your favorite recipes, all in one place.</p>
+        </section>
+
+        <div class="message success" hidden th:hidden="${notice == null}" th:if="${notice}" th:text="${notice}" role="status"></div>
+        <div class="message error" hidden th:hidden="${error == null}" th:if="${error}" th:text="${error}" role="alert"></div>
+
+        <section class="shopping-card">
+            <div class="shopping-card-heading">
+                <div>
+                    <span class="shopping-kicker">YOUR NEXT LITTLE SHOP</span>
+                    <h2>Things to pick up <span class="inline-count" th:text="${itemCount}">0</span></h2>
+                </div>
+                <a class="add-button" href="index.html" th:href="@{/recipe-ingredients}">＋ Add from recipes</a>
+            </div>
+
+            <div class="shopping-items" th:if="${!#lists.isEmpty(items)}">
+                <div class="shopping-item" th:each="item : ${items}" th:classappend="${item.purchased ? ' is-purchased' : ''}">
+                    <form class="shopping-toggle-form" method="post" action="#" th:action="@{/shopping-list/{id}/toggle(id=${item.id})}">
+                        <button class="check-button" type="submit" th:aria-label="${item.purchased ? 'Mark ' + item.name + ' as needed' : 'Mark ' + item.name + ' as picked up'}">
+                            <span th:text="${item.purchased ? '✓' : ''}"></span>
+                        </button>
+                        <select name="category" class="shopping-category-select" required
+                                th:unless="${item.addedToPantry}" th:aria-label="${'Category for ' + item.name}">
+                            <option value="" disabled th:selected="${item.category == null}">Choose category</option>
+                            <option th:each="categoryOption : ${categories}" th:value="${categoryOption}"
+                                    th:text="${categoryOption}" th:selected="${categoryOption == item.category}">Protein</option>
+                        </select>
+                        <span class="shopping-category-label" th:if="${item.addedToPantry}" th:text="${item.category}">Vegetable</span>
+                        <input type="hidden" name="category" th:if="${item.addedToPantry}" th:value="${item.category}">
+                    </form>
+                    <div class="shopping-item-name">
+                        <strong th:text="${item.name}">Red onion</strong>
+                        <span th:text="${item.amount}">1 pc</span>
+                    </div>
+                    <form class="shopping-remove-form" method="post" action="#" th:action="@{/shopping-list/{id}/delete(id=${item.id})}">
+                        <button class="remove-button" type="submit" th:aria-label="${'Remove ' + item.name}" title="Remove item">×</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="shopping-empty" hidden th:hidden="${!#lists.isEmpty(items)}">
+                <span class="empty-icon">☷</span>
+                <strong>Your list is ready for inspiration</strong>
+                <p>Favorite a recipe and add its missing ingredients here.</p>
+                <a class="hero-button" href="index.html" th:href="@{/recipes}">Find a recipe <span>↗</span></a>
+            </div>
+
+            <div class="shopping-card-footer">
+                <span><span>✳</span> Ingredients are combined across your recipes.</span>
+                <span><strong th:text="${itemCount}">0</strong> left to pick up</span>
+            </div>
+        </section>
+
+        <p class="pantry-footnote shopping-footnote"><span>✳</span> Shop for what you need. Cook what you love.</p>
+        <footer class="footer"><span>nomi</span> &nbsp; make something delicious. <span class="footer-right">COOK SMARTER. WASTE LESS.</span></footer>
+    </main>
+</div>
+</body>
+</html>

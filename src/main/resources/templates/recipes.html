@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#f7f6f1">
+    <title>Recipes — nomi</title>
+    <link rel="stylesheet" href="../static/css/styles.css" th:href="@{/css/styles.css}">
+</head>
+<body>
+<div class="app-shell">
+    <aside th:replace="~{fragments/navigation :: sidebar('recipes')}"></aside>
+    <main class="main-content">
+        <header class="topbar">
+            <div class="topbar-right">
+                <span class="today" th:text="${today}">Thursday, November 19</span>
+            </div>
+        </header>
+
+        <section class="welcome-row">
+            <div>
+                <p class="eyebrow"><span class="eyebrow-dot"></span> YOUR KITCHEN, IN SYNC</p>
+                <h1>Good morning, Manan<span class="period">.</span></h1>
+                <p class="welcome-copy">See what you can make with your pantry. Favorite a recipe to add missing ingredients to your shopping list.</p>
+            </div>
+            <div class="weather-pill"><span>☀</span> A lovely day to cook</div>
+        </section>
+
+        <div class="message success" hidden th:hidden="${notice == null}" th:if="${notice}" th:text="${notice}" role="status"></div>
+        <div class="message error" hidden th:hidden="${error == null}" th:if="${error}" th:text="${error}" role="alert"></div>
+
+        <section class="hero-card">
+            <div class="hero-content">
+                <span class="hero-kicker">TODAY'S LITTLE NUDGE</span>
+                <h2>Good food starts<br>with what you have.</h2>
+                <p>You've got the makings of a lovely lunch. Let's see what your kitchen has to say.</p>
+                <a class="hero-button" href="index.html" th:href="@{/pantry}">Explore your pantry <span>↗</span></a>
+            </div>
+            <div class="hero-art" aria-hidden="true">
+                <div class="sun-disc"></div>
+                <div class="plate plate-back"></div>
+                <div class="plate plate-front">
+                    <span class="food tomato"></span><span class="food avocado"></span>
+                    <span class="food leaf leaf-one"></span><span class="food leaf leaf-two"></span>
+                    <span class="food egg"></span><span class="food seed"></span>
+                </div>
+                <span class="art-spark spark-one">✳</span><span class="art-spark spark-two">✦</span>
+                <span class="art-stem"></span>
+            </div>
+            <span class="hero-decoration">Nº 01 &nbsp; / &nbsp; YOUR PANTRY</span>
+        </section>
+
+        <section class="stats-grid" aria-label="Pantry summary">
+            <article class="stat-card">
+                <div class="stat-label"><span class="stat-icon green">▤</span> IN YOUR PANTRY</div>
+                <div class="stat-value"><span th:text="${ingredientCount}">8</span><span class="stat-unit"> ingredients</span></div>
+                <div class="stat-foot"><span class="tiny-dot green-dot"></span> Your kitchen is looking good</div>
+            </article>
+            <article class="stat-card">
+                <div class="stat-label"><span class="stat-icon peach">◷</span> RUNNING LOW</div>
+                <div class="stat-value"><span th:text="${lowStockCount}">5</span><span class="stat-unit"> to keep an eye on</span></div>
+                <div class="stat-foot">A quick shop might be in order</div>
+            </article>
+            <article class="stat-card recipe-stat">
+                <div class="stat-label"><span class="stat-icon lavender">✳</span> READY TO COOK</div>
+                <div class="stat-value"><span th:text="${readyRecipeCount}">2</span><span class="stat-unit"> recipes</span></div>
+                <div class="stat-foot">Made from things you already have</div>
+            </article>
+        </section>
+
+        <section class="recipes-section recipe-page-section">
+            <div class="section-heading recipes-heading">
+                <div>
+                    <p class="eyebrow section-eyebrow">BASED ON YOUR PANTRY</p>
+                    <h2>Recipes for your pantry<span class="inline-count" th:text="${#lists.size(recipeMatches)}">0</span></h2>
+                    <p class="section-description">Ready-to-cook recipes appear first. Favorite a recipe with missing items to add them to your shopping list.</p>
+                </div>
+                <div class="recipe-header-actions">
+                    <a class="add-button" href="recipe-form.html" th:href="@{/recipes/new}"><span>＋</span> Add recipe</a>
+                    <a class="add-button" href="index.html" th:href="@{/recipe-ingredients}">Check ingredients <span>↗</span></a>
+                </div>
+            </div>
+
+            <div class="recipe-grid">
+                <article class="recipe-card" th:each="match : ${recipeMatches}">
+                    <div class="recipe-art food-sage" th:class="${'recipe-art food-' + match.recipe.color}">
+                        <span class="recipe-emoji" th:text="${match.recipe.emoji}">🍽️</span>
+                        <span class="recipe-time"><span>◷</span> <span th:text="${match.recipe.minutes}">10</span> min</span>
+                        <form class="favorite-form" method="post" action="#" th:if="${match.favorite || match.readyToCook}"
+                              th:action="@{/recipes/{id}/favorite(id=${match.recipe.id})}">
+                            <button type="submit" class="favorite-button" th:classappend="${match.favorite ? ' is-favorite' : ''}"
+                                    th:aria-label="${match.favorite ? 'Remove from favorites' : 'Add to favorites'}">
+                                <span th:text="${match.favorite ? '♥' : '♡'}">♡</span>
+                            </button>
+                        </form>
+                    </div>
+                    <div class="recipe-body">
+                        <div class="recipe-card-topline">
+                            <span class="recipe-ready" th:if="${match.readyToCook}">READY TO COOK</span>
+                            <span class="recipe-close" th:unless="${match.readyToCook}"
+                                  th:text="${match.missingCount == 1 ? 'JUST ONE THING MISSING' : match.missingCount + ' THINGS MISSING'}">JUST ONE THING MISSING</span>
+                            <span class="match-percent" th:text="${match.matchPercent + '% in pantry'}">100% in pantry</span>
+                        </div>
+                        <h3 th:text="${match.recipe.name}">Green goddess toast</h3>
+                        <p class="recipe-description" th:text="${match.recipe.description}">A delicious meal to make at home.</p>
+                        <details class="favorite-plan" th:if="${!match.favorite && !match.readyToCook}">
+                            <summary>Favorite &amp; add what's missing</summary>
+                            <form method="post" action="#" th:action="@{/recipes/{id}/favorite(id=${match.recipe.id})}">
+                                <label class="favorite-plan-row" th:each="item : ${match.missingIngredients}">
+                                    <span><strong th:text="${item.name}">Red onion</strong><small th:text="${item.amount}">1 pc</small></span>
+                                    <select name="categories" required th:aria-label="${'Category for ' + item.name}">
+                                        <option value="" th:selected="${item.category == null}" disabled>Choose category</option>
+                                        <option th:each="category : ${categories}" th:value="${category}"
+                                                th:selected="${item.category == category}" th:text="${category}">Vegetable</option>
+                                    </select>
+                                </label>
+                                <button class="recipe-add-button" type="submit">Favorite &amp; add to shopping list <span>＋</span></button>
+                            </form>
+                        </details>
+                        <details class="recipe-instructions" th:if="${!#lists.isEmpty(match.recipe.instructions)}">
+                            <summary>Cooking instructions</summary>
+                            <ol><li th:each="step : ${match.recipe.instructions}" th:text="${step}">Prepare and cook the ingredients.</li></ol>
+                        </details>
+                        <a class="recipe-ingredients-link" href="index.html" th:href="@{/recipe-ingredients}">
+                            See ingredients <span th:text="${match.totalCount}">0</span> <span>↗</span>
+                        </a>
+                        <form class="recipe-delete-form" method="post" action="#" th:action="@{/recipes/{id}/delete(id=${match.recipe.id})}"
+                              onsubmit="return confirm('Remove this recipe?')">
+                            <button type="submit">Remove recipe</button>
+                        </form>
+                    </div>
+                </article>
+            </div>
+            <div class="recipe-empty" hidden th:hidden="${!#lists.isEmpty(recipeMatches)}">
+                <span>✳</span><strong>Your recipe book starts here</strong>
+                <p>Add a recipe and its ingredients. nomi will check them against your pantry.</p>
+                <a class="hero-button" href="recipe-form.html" th:href="@{/recipes/new}">Add your first recipe <span>↗</span></a>
+            </div>
+        </section>
+        <footer class="footer"><span>nomi</span> &nbsp; make something delicious. <span class="footer-right">COOK SMARTER. WASTE LESS.</span></footer>
+    </main>
+</div>
+</body>
+</html>

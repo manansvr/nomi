@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+<aside class="sidebar" th:fragment="sidebar(active)">
+    <a class="brand" th:href="@{/}" aria-label="nomi home"><span>nomi</span></a>
+    <nav class="navigation" aria-label="Main navigation">
+        <a class="nav-link" th:classappend="${active == 'recipes' ? ' active' : ''}"
+           th:attr="aria-current=${active == 'recipes' ? 'page' : null}" th:href="@{/}">
+            <span class="nav-icon" aria-hidden="true">▤</span><span class="nav-label">Recipes</span>
+        </a>
+        <a class="nav-link" th:classappend="${active == 'recipe-ingredients' ? ' active' : ''}"
+           th:attr="aria-current=${active == 'recipe-ingredients' ? 'page' : null}" th:href="@{/recipe-ingredients}">
+            <span class="nav-icon" aria-hidden="true">☷</span><span class="nav-label">Recipe ingredients</span>
+        </a>
+        <a class="nav-link" th:classappend="${active == 'pantry' ? ' active' : ''}"
+           th:attr="aria-current=${active == 'pantry' ? 'page' : null}" th:href="@{/pantry}">
+            <span class="nav-icon" aria-hidden="true">▣</span><span class="nav-label">Pantry</span>
+        </a>
+        <a class="nav-link" th:classappend="${active == 'shopping-list' ? ' active' : ''}"
+           th:attr="aria-current=${active == 'shopping-list' ? 'page' : null}" th:href="@{/shopping-list}">
+            <span class="nav-icon" aria-hidden="true">⌑</span><span class="nav-label">Shopping list</span>
+        </a>
+    </nav>
+    <div class="sidebar-note">
+        <div class="note-spark">✳</div>
+        <p class="note-title">A little less waste,<br>a lot more yum.</p>
+        <p class="note-copy">Your pantry is the starting point for something delicious.</p>
+    </div>
+    <div class="profile">
+        <div class="avatar">M</div>
+        <div><strong>Manan</strong><span>Home cook</span></div>
+        <span class="profile-menu">···</span>
+    </div>
+</aside>
+</body>
+</html>
