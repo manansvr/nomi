@@ -18,4 +18,4 @@ mvn spring-boot:run
 
 Then open [http://localhost:8080](http://localhost:8080) and create an account.
 
-By default, accounts and app data are stored locally in the ignored `data/` directory and survive app restarts. When PostgreSQL is configured with `DATABASE_URL`, `POSTGRES_URL`, or `SPRING_DATASOURCE_URL`, accounts and app data are stored in the database instead. Existing shared data is not automatically assigned to a new account.
+The pantry starts empty; add ingredients as you stock your kitchen. By default, accounts and app data are stored locally in the ignored `data/` directory and survive app restarts. When PostgreSQL is configured with `DATABASE_URL`, `POSTGRES_URL`, or `SPRING_DATASOURCE_URL`, accounts and app data are stored in the database instead. Existing shared data is not automatically assigned to a new account.

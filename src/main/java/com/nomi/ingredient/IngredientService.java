@@ -14,16 +14,7 @@ import java.util.UUID;
 
 @Service
 public class IngredientService {
-    private final List<Ingredient> ingredients = new ArrayList<>(List.of(
-            new Ingredient("1", "Avocados", "Fruits", 3, "pcs"),
-            new Ingredient("2", "Baby spinach", "Vegetable", 1, "bag"),
-            new Ingredient("3", "Cherry tomatoes", "Vegetable", 2, "cups"),
-            new Ingredient("4", "Free-range eggs", "Protein", 6, "pcs"),
-            new Ingredient("5", "Feta cheese", "Protein", 1, "block"),
-            new Ingredient("6", "Sourdough bread", "Carbohydrate", 4, "slices"),
-            new Ingredient("7", "Chickpeas", "Protein", 2, "cans"),
-            new Ingredient("8", "Extra virgin olive oil", "Spices", 1, "bottle")
-    ));
+    private final List<Ingredient> ingredients = new ArrayList<>();
     private final List<String> categories = List.of("Protein", "Carbohydrate", "Vegetable", "Fruits", "Spices");
     private PersistentJsonStore storage;
 
@@ -106,25 +97,9 @@ public class IngredientService {
         if (storage == null) return false;
         java.util.Optional<List<StoredIngredient>> saved = storage.read("ingredients.json", new TypeReference<>() { });
         ingredients.clear();
-        if (saved.isEmpty()) {
-            ingredients.addAll(defaultIngredients());
-            return false;
-        }
+        if (saved.isEmpty()) return false;
         saved.get().stream().map(item -> new Ingredient(item.id(), item.name(), item.category(), item.quantity(), item.unit())).forEach(ingredients::add);
         return true;
-    }
-
-    private static List<Ingredient> defaultIngredients() {
-        return List.of(
-                new Ingredient("1", "Avocados", "Fruits", 3, "pcs"),
-                new Ingredient("2", "Baby spinach", "Vegetable", 1, "bag"),
-                new Ingredient("3", "Cherry tomatoes", "Vegetable", 2, "cups"),
-                new Ingredient("4", "Free-range eggs", "Protein", 6, "pcs"),
-                new Ingredient("5", "Feta cheese", "Protein", 1, "block"),
-                new Ingredient("6", "Sourdough bread", "Carbohydrate", 4, "slices"),
-                new Ingredient("7", "Chickpeas", "Protein", 2, "cans"),
-                new Ingredient("8", "Extra virgin olive oil", "Spices", 1, "bottle")
-        );
     }
 
     private record StoredIngredient(String id, String name, String category, int quantity, String unit) { }

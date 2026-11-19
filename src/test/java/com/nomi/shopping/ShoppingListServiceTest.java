@@ -50,6 +50,7 @@ class ShoppingListServiceTest {
 
     @Test
     void pickedUpIngredientsIncreaseMatchingPantryStockAndKeepItsCategory() {
+        pantry.add("Avocados", "Fruits", 3, "pcs");
         service.addMissing(List.of(new RecipeIngredient("Avocado", 2, "pcs")), List.of("Protein"));
         ShoppingItem item = service.findAll().get(0);
 

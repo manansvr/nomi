@@ -12,7 +12,16 @@ class IngredientServiceTest {
     private final IngredientService service = new IngredientService();
 
     @Test
+    void startsWithAnEmptyPantry() {
+        assertEquals(0, service.count());
+        assertTrue(service.find("", "").isEmpty());
+    }
+
+    @Test
     void filtersIngredientsByCaseInsensitiveSearchAndCategory() {
+        service.add("Baby spinach", "Vegetable", 1, "bag");
+        service.add("Cherry tomatoes", "Vegetable", 2, "cups");
+
         List<Ingredient> results = service.find("SPINACH", "Vegetable");
 
         assertEquals(1, results.size());
@@ -21,9 +30,12 @@ class IngredientServiceTest {
 
     @Test
     void quantityChangesCannotGoBelowZero() {
-        assertTrue(service.adjust("2", -1));
+        service.add("Baby spinach", "Vegetable", 1, "bag");
+        String spinachId = service.find("spinach", "").get(0).getId();
+
+        assertTrue(service.adjust(spinachId, -1));
         assertEquals(0, service.find("", "Vegetable").stream()
-                .filter(ingredient -> ingredient.getId().equals("2"))
+                .filter(ingredient -> ingredient.getId().equals(spinachId))
                 .findFirst().orElseThrow().getQuantity());
         assertFalse(service.adjust("missing", 1));
     }
@@ -42,9 +54,14 @@ class IngredientServiceTest {
 
     @Test
     void recognizesRecipeNamesAndTreatsZeroQuantityAsUnavailable() {
+        service.add("Avocados", "Fruits", 3, "pcs");
+        service.add("Cherry tomatoes", "Vegetable", 2, "cups");
+        service.add("Baby spinach", "Vegetable", 1, "bag");
+
         assertTrue(service.hasIngredient("Avocado"));
         assertTrue(service.hasIngredient("Tomato"));
-        assertTrue(service.adjust("2", -1));
+        String spinachId = service.find("spinach", "").get(0).getId();
+        assertTrue(service.adjust(spinachId, -1));
         assertFalse(service.hasIngredient("Spinach"));
     }
 

@@ -13,6 +13,7 @@ class RecipeCatalogServiceTest {
 
     @Test
     void userRecipesAreMatchedAgainstThePantry() {
+        pantry.add("Avocados", "Fruits", 3, "pcs");
         Recipe recipe = service.addRecipe("Garden toast", "A quick lunch.", 10,
                 java.util.List.of(
                         new RecipeIngredient("Avocado", 1, "pc"),
